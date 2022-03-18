@@ -1,0 +1,15 @@
+extends layout
+block content
+    .page-body
+        .list-product
+            each product , i in listProduct
+                .product-item
+                    form(action='/', method="post", enctype="application/x-www-form-urlencoded")
+                        input(type="hidden",name="id",value=product.id)
+                        .product-info 
+                            p.product-info__name #{product.name}
+                            p.product-info__code #{product.code}
+                        .product-img 
+                            img(src=product.img, alt="")
+                            p.price-product #{product.price}$
+                        button.product-addshoppingcart(type="submit") ADD TO CART

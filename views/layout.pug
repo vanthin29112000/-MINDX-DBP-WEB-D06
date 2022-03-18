@@ -1,0 +1,28 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Document
+        link(rel='preconnect' href='https://fonts.googleapis.com')
+        link(rel='preconnect' href='https://fonts.gstatic.com' crossorigin='')
+        link(href='https://fonts.googleapis.com/css2?family=Fredoka&family=League+Spartan:wght@700&family=Lobster&display=swap' rel='stylesheet')
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(href='https://fonts.googleapis.com/css2?family=Acme&display=swap' rel='stylesheet')
+        script(src='https://kit.fontawesome.com/523d67677c.js' crossorigin='anonymous')
+    body 
+      .header
+        .logo 
+            form(action="/",method="get", enctype="application/x-www-form-urlencoded") 
+                button(type="submit")
+                    p.logo-text HUBLOT 
+        form.shoppingcart-account-icon(action='/shoppingcart', method="get", enctype="application/x-www-form-urlencoded")              
+            .shoppingcart-info
+                p Quantity : #{quantity}
+                p Total price : #{price} $
+            button.shoppingcart-icon
+                i.fa-solid.fa-cart-shopping.i-active
+            button 
+                i.fa-solid.fa-user.account-info.i-active
+      block content
