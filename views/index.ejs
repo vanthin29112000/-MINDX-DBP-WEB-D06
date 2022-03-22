@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <%- include("layouts/header"); -%>
+  
+  <body>
+    <%- include("layouts/navbar"); -%>
+    <header class="masthead" style="background-image: url('/img/contact-bg.jpg')">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="page-heading">
+              <h1>DBP_06 CLASS HELLO WORLD</h1>
+              <span class="subheading">This is blog of class Mindx of DBP_06</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </header>
+    <div class="container px-4 px-lg-5">
+      <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+            <% for(let a of blogs) {%>
+              <!-- Post preview-->
+              <div class="post-preview">
+                  <a href="post.html">
+                      <h2 class="post-title"><%=a.title%></h2>
+                      <h3 class="post-subtitle"><%=a.body%></h3>
+                  </a>
+                  <p class="post-meta">
+                      Posted by
+                      <a href="#!">Start Bootstrap</a>
+                      on <%=moment(a.datePosted).format("LL") %>
+                  </p>
+              </div>
+
+              <!-- Divider-->
+              <hr class="my-4" />
+            <% } %>
+            <!-- Pager-->
+            <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="#!">Older Posts →</a></div>
+        </div>
+    </div>
+    </div>
+    <%- include("layouts/footer"); -%>
+    <%- include("layouts/scripts"); -%>
+  </body>
+</html>
