@@ -2,10 +2,10 @@ const userModel = require("../models/userModel");
 const { hashing, checkCompare } = require("../utils/hashing/hashing");
 const generateToken = require("../utils/token/generateToken");
 const verifyToken = require("../utils/token/verifyToken");
-
-// Register user
-
-const registerUser = async (req, res, next) => {
+const asyncHandler = require("express-async-handler");
+const mongoose = require("mongoose");
+const checkIDMongoose = require("../utils/checkIDMongoose/checkIDMongoose");
+const registerUser = asyncHandler(async (req, res, next) => {
    const { name, email, password } = req.body;
 
    const userExists = await userModel.findOne({ email: email });
@@ -14,12 +14,10 @@ const registerUser = async (req, res, next) => {
       throw new Error("user already exists");
    }
 
-   const passwordHashing = await hashing(password);
-
    const newUser = await userModel.create({
       name,
       email,
-      password: passwordHashing,
+      password,
    });
    if (newUser) {
       res.status(200).json({
@@ -32,17 +30,9 @@ const registerUser = async (req, res, next) => {
       res.status(400);
       throw new Error("invalid user data!!");
    }
-};
+});
 
-// Login User
-/*
-    1. Gui email, pass
-    2. Check email co ton tai khong
-    3. check pass co dung khong
-    4. Tra ve thong tin voi token 
-    return token 
-*/
-const loginUser = async (req, res, next) => {
+const loginUser = asyncHandler(async (req, res, next) => {
    const { email, password } = req.body;
 
    const userExists = await userModel.findOne({ email: email });
@@ -51,7 +41,7 @@ const loginUser = async (req, res, next) => {
       throw new Error("Email does not exists");
    }
 
-   await checkCompare(password, userExists.password);
+   const resultCheckPass = await checkCompare(password, userExists.password);
 
    if (resultCheckPass) {
       res.status(200).json({
@@ -62,55 +52,132 @@ const loginUser = async (req, res, next) => {
       res.status(400);
       throw new Error("incorrect password");
    }
-};
+});
 
-// Get profile user
-/*
-    1. Lấy token
-    2. Verify token
-    3. Tra về profile user
-*/
-const getProfileUser = async (req, res, next) => {
-   const token = req.header("auth-token");
-
+const getProfileUser = asyncHandler(async (req, res, next) => {
    try {
-      const user = await verifyToken(token);
-      const userFindDb = await userModel.findOne({ _id: user._id });
-      if (!userFindDb) {
+      try {
+         const { name, email } = req.user;
+         res.status(200).json({
+            name,
+            email,
+         });
+      } catch (error) {
          res.status(400);
-         throw new Error("user does not exist or has been deleted");
+         throw new Error(error);
+      }
+   } catch (e) {
+      console.log(e.message);
+   }
+});
+
+const updateProfileUser = asyncHandler(async (req, res, next) => {
+   let user = await userModel.findOne({ _id: req.user._id });
+   try {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      if (req.body.password) {
+         user.password = req.body.password;
       }
 
-      const { name, email } = userFindDb;
-      res.status(200).json({
-         name,
-         email,
+      const updateUser = await user.save();
+      res.json({
+         name: updateUser.name,
+         email: updateUser.email,
+         password: updateUser.password,
+         isAdmin: updateUser.isAdmin,
       });
    } catch (error) {
       res.status(400);
       throw new Error(error);
    }
+});
+
+const getUsers = async (req, res, next) => {
+   try {
+      const users = await userModel.find();
+   } catch (error) {
+      throw new Error(error);
+   }
+   res.json(users);
 };
 
-// Update profile user
-/*
-    1. verify token
- */
-const updateProfileUser = async (req, res, next) => {
-   const token = req.header("auth-token");
-   const updateObject = { ...req.body };
+const deleteUserById = asyncHandler(async (req, res, next) => {
+   const id = req.params.id;
+
+   checkIDMongoose(id);
+
+   const user = await userModel.findById(id);
+   if (!user) {
+      res.status(400);
+      throw new Error("ID invalid");
+   }
+
+   if (id.localeCompare(req.user._id) !== 0) {
+      try {
+         await userModel.deleteOne({ _id: id });
+         res.status(200).send("successful delete");
+      } catch (error) {
+         throw new Error(error);
+      }
+   } else {
+      res.status(400);
+      throw new Error("you don't delete yourselft");
+   }
+});
+
+const getProfileUserByID = asyncHandler(async (req, res, next) => {
+   const id = req.params.id;
+
+   checkIDMongoose(id);
 
    try {
-      const user = await verifyToken(token);
-      console.log("id", user._id);
-      await userModel.findOneAndUpdate(
-         { _id: user._id },
-         { $set: updateObject }
-      );
+      const user = await userModel.findById(id);
+
+      res.json({
+         name: user.name,
+         email: user.email,
+         password: user.password,
+         isAdmin: user.isAdmin,
+      });
    } catch (error) {
       res.status(400);
       throw new Error(error);
    }
-};
+});
 
-module.exports = { registerUser, loginUser, getProfileUser, updateProfileUser };
+const updateProfileUserByID = asyncHandler(async (req, res, next) => {
+   const id = req.params.id;
+   checkIDMongoose(id);
+
+   let user = await userModel.findById(id);
+   try {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      if (req.body.password) {
+         user.password = req.body.password;
+      }
+
+      const updateUser = await user.save();
+      res.json({
+         name: updateUser.name,
+         email: updateUser.email,
+         password: updateUser.password,
+         isAdmin: updateUser.isAdmin,
+      });
+   } catch (error) {
+      res.status(400);
+      throw new Error(error);
+   }
+});
+
+module.exports = {
+   registerUser,
+   loginUser,
+   getProfileUser,
+   updateProfileUser,
+   getUsers,
+   deleteUserById,
+   getProfileUserByID,
+   updateProfileUserByID,
+};
