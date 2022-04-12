@@ -15,7 +15,7 @@ const renderProduct = () => {
    for (let i = 0; i < 50; i++) {
       const j = i + 1;
       tempProduct = {
-         user: idUser,
+         // user: idUser,
          name: "sản phẩm " + j,
          image: listImage[i],
          brand: "new brand",

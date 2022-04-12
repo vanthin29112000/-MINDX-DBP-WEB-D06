@@ -41,7 +41,6 @@ router.put("/profile", protect, updateProfileUser);
 // @route: GET /api/users
 // @access: Private/admin
 router.get("/", protect, isAdmin, getUsers);
-module.exports = router;
 
 // 6.
 // @desc: Delete user
@@ -60,3 +59,5 @@ router.get("/:id", protect, isAdmin, getProfileUserByID);
 // @route: PUT /api/users/:id
 // @access: Private/admin
 router.put("/:id", protect, isAdmin, updateProfileUserByID);
+
+module.exports = router;

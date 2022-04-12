@@ -13,7 +13,11 @@ const importData = async () => {
       // await User.insertMany(users);
       //create seeder Products
       await Product.deleteMany();
-      await Product.insertMany(products);
+      const userAdmin = await Users.findOne({ isAdmim: true });
+      const sampleProducts = products.map((product) => {
+         return { ...product, user: userAdmin._id };
+      });
+      await Product.insertMany(sampleProducts);
       console.log("data imported success");
    } catch (err) {
       console.log(err);
