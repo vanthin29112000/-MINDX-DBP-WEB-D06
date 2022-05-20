@@ -81,12 +81,17 @@ const productData = (state = initProduct, action) => {
          const findIndex = state.shoppingCart.findIndex(
             (ele) => ele.id === action.payload.id
          );
-         state.shoppingCart[findIndex].quantity--;
-         return {
-            ...state,
-            shoppingCart: state.shoppingCart,
-            numberCart: state.numberCart - 1,
-         };
+
+         let productCurrent = state.shoppingCart[findIndex];
+
+         if (productCurrent.quantity > 1) {
+            productCurrent.quantity--;
+            return {
+               ...state,
+               shoppingCart: state.shoppingCart,
+               numberCart: state.numberCart - 1,
+            };
+         }
       }
       default:
          return state;
